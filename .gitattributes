@@ -1,0 +1,13 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Windows batch files should use CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Shell scripts should use LF
+*.sh text eol=lf
+
+# Maven wrapper files
+mvnw text eol=lf
+mvnw.cmd text eol=crlf
