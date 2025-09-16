@@ -1,2 +1,2 @@
-# Vinenull
-A modern self-hosted music player
+# Whisperrr
+A modern AI transcriber utilizing openai Whisper.
