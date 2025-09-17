@@ -1,6 +1,6 @@
 // Custom hook for file upload functionality
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { validateAudioFile, formatFileSize } from '../utils/fileValidation';
 import { ERROR_MESSAGES } from '../utils/constants';
@@ -126,7 +126,14 @@ export const useFileUpload = (options: UseFileUploadOptions = {}): UseFileUpload
     onDragOver,
     onDropRejected,
     accept: {
-      'audio/*': ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.wma']
+      'audio/*': ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.wma'],
+      // Also accept by extension directly
+      '.mp3': ['audio/mpeg', 'audio/mp3'],
+      '.wav': ['audio/wav', 'audio/wave', 'audio/x-wav'],
+      '.m4a': ['audio/mp4', 'audio/m4a', 'audio/x-m4a'],
+      '.flac': ['audio/flac', 'audio/x-flac'],
+      '.ogg': ['audio/ogg', 'audio/vorbis'],
+      '.wma': ['audio/x-ms-wma', 'audio/wma']
     },
     maxFiles,
     maxSize: 25 * 1024 * 1024, // 25MB

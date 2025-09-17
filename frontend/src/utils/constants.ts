@@ -6,12 +6,27 @@ export const APP_CONFIG = {
   description: 'AI-powered audio transcription platform',
   maxFileSize: 25 * 1024 * 1024, // 25MB in bytes
   supportedFormats: [
-    'audio/mpeg',      // MP3
-    'audio/wav',       // WAV
-    'audio/mp4',       // M4A
-    'audio/flac',      // FLAC
-    'audio/ogg',       // OGG
-    'audio/x-ms-wma',  // WMA
+    // MP3 variants
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/mpeg3',
+    // WAV variants
+    'audio/wav',
+    'audio/wave',
+    'audio/x-wav',
+    // M4A variants
+    'audio/mp4',
+    'audio/m4a',
+    'audio/x-m4a',
+    // FLAC variants
+    'audio/flac',
+    'audio/x-flac',
+    // OGG variants
+    'audio/ogg',
+    'audio/vorbis',
+    // WMA variants
+    'audio/x-ms-wma',
+    'audio/wma',
   ],
   supportedExtensions: ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.wma'],
   pollingInterval: 2000, // 2 seconds

@@ -27,21 +27,26 @@ export const validateAudioFile = (file: File): ValidationResult => {
     };
   }
 
-  // Check file type
-  if (!APP_CONFIG.supportedFormats.includes(file.type)) {
-    return {
-      isValid: false,
-      error: ERROR_MESSAGES.INVALID_FORMAT,
-    };
-  }
-
-  // Check file extension as fallback
+  // Check file extension first (more reliable)
   const extension = getFileExtension(file.name);
   if (!APP_CONFIG.supportedExtensions.includes(extension)) {
     return {
       isValid: false,
       error: ERROR_MESSAGES.INVALID_FORMAT,
     };
+  }
+
+  // Check file type (MIME type) - be more permissive
+  // If MIME type is not in our list but extension is valid, still allow it
+  // This handles cases where browsers report different MIME types
+  if (file.type && !file.type.startsWith('audio/') && !APP_CONFIG.supportedFormats.includes(file.type)) {
+    // Only reject if it's clearly not an audio file and not in our supported formats
+    if (!file.type.includes('audio') && !APP_CONFIG.supportedFormats.includes(file.type)) {
+      return {
+        isValid: false,
+        error: ERROR_MESSAGES.INVALID_FORMAT,
+      };
+    }
   }
 
   return { isValid: true };
