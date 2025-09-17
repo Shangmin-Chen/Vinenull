@@ -3,8 +3,8 @@ Configuration management for the Whisperrr FastAPI service.
 """
 
 import os
-from typing import List
-from pydantic import validator
+from typing import List, Union
+from pydantic import validator, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -21,12 +21,16 @@ class Settings(BaseSettings):
     api_title: str = "Whisperrr Transcription Service"
     api_description: str = "Production-ready audio transcription using OpenAI Whisper"
     api_version: str = "1.0.0"
-    cors_origins: List[str] = ["http://localhost:8080", "http://127.0.0.1:8080"]
+    cors_origins: Union[List[str], str] = ["http://localhost:8080", "http://localhost:3000", "http://127.0.0.1:8080", "http://127.0.0.1:3000"]
     
     # Processing configuration
     max_concurrent_transcriptions: int = 3
     request_timeout_seconds: int = 300
     cleanup_temp_files: bool = True
+    
+    # Performance and monitoring
+    enable_metrics: bool = True
+    enable_health_checks: bool = True
     
     # Supported audio formats
     supported_formats: List[str] = ["mp3", "wav", "m4a", "flac", "ogg", "wma"]
@@ -66,6 +70,14 @@ class Settings(BaseSettings):
     def validate_upload_dir(cls, v):
         """Ensure upload directory exists."""
         os.makedirs(v, exist_ok=True)
+        return v
+    
+    @validator("cors_origins", pre=True)
+    def parse_cors_origins(cls, v):
+        """Parse CORS origins from string or list."""
+        if isinstance(v, str):
+            # Handle comma-separated string from environment variables
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
     
     @property
