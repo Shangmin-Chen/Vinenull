@@ -1,0 +1,83 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: whisperrr-postgres
+    environment:
+      POSTGRES_DB: transcription_db
+      POSTGRES_USER: transcription_user
+      POSTGRES_PASSWORD: transcription_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database-setup.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - whisperrr-network
+
+  # Python Transcription Service
+  python-service:
+    build:
+      context: ./python-service
+      dockerfile: Dockerfile
+    container_name: whisperrr-python
+    environment:
+      - MODEL_SIZE=base
+      - MAX_FILE_SIZE_MB=25
+      - CORS_ORIGINS=http://localhost:8080,http://localhost:3000
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./python-service/app:/app/app
+    networks:
+      - whisperrr-network
+    depends_on:
+      - postgres
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: whisperrr-backend
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/transcription_db
+      - SPRING_DATASOURCE_USERNAME=transcription_user
+      - SPRING_DATASOURCE_PASSWORD=transcription_pass
+      - WHISPERRR_SERVICE_URL=http://python-service:8000
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/src:/app/src
+    networks:
+      - whisperrr-network
+    depends_on:
+      - postgres
+      - python-service
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: whisperrr-frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080/api
+      - REACT_APP_POLLING_INTERVAL=2000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - whisperrr-network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  whisperrr-network:
+    driver: bridge
