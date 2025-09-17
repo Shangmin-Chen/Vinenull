@@ -10,15 +10,42 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci --only=production
 
-# Copy source code
+# Copy source code and configuration files
 COPY src ./src
 COPY public ./public
+COPY tsconfig.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
 
 # Build the application
 RUN npm run build
 
+# Development stage (for live reloading)
+FROM node:20-alpine AS development
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm install
+
+# Copy configuration files
+COPY tsconfig.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
+COPY public ./public
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "start"]
+
 # Production stage
-FROM nginx:1.25-alpine
+FROM nginx:1.25-alpine AS production
 
 # Copy built files from build stage
 COPY --from=build /app/build /usr/share/nginx/html
